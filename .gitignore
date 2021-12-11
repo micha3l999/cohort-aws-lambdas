@@ -1,2 +1,5 @@
 # Excluding Jetbrain folder
 .idea
+
+# Excluding all .zip files
+/*/*.zip
