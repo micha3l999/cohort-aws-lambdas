@@ -3,8 +3,9 @@ import json
 
 
 def lambda_handler(event, context):
+
     dynamodb = boto3.resource('dynamodb')
-    table = dynamodb.Table('CohortStudents')
+    table = dynamodb.Table('Cohort-Students')
     response = table.scan()
     items = response.get('Items', [])
 

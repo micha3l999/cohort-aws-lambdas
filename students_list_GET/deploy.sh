@@ -14,4 +14,4 @@ cd ..
 # If you want to create a function, use this command > `create-function` instead `update-function-code`
 # And remember use your AWS profile name instead `me`
 # Updating function on AWS
-aws lambda update-function-code --profile me --function-name ${LAMBDA_NAME} --zip-file "fileb://${LAMBDA_NAME}.zip"
+aws lambda update-function-code --function-name ${LAMBDA_NAME} --zip-file "fileb://${LAMBDA_NAME}.zip"
