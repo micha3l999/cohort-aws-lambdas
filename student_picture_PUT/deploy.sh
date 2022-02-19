@@ -1,4 +1,4 @@
-LAMBDA_NAME="create-student"
+LAMBDA_NAME="student_picture_PUT"
 
 # Zipping lambda
 zip "${LAMBDA_NAME}.zip" lambda_function.py

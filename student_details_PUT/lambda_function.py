@@ -53,8 +53,7 @@ def lambda_handler(event, context):
         },
         ReturnValues="UPDATED_NEW"
     )
-    print(response)
-
+    
     # Response for the client
     data = {
         "message": "Student was updated",
