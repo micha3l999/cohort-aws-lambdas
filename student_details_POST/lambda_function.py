@@ -1,4 +1,5 @@
 import boto3
+import botocore
 import json
 from datetime import date
 
@@ -61,16 +62,38 @@ def lambda_handler(event, context):
     # Creating default values for the user
     student_payload["status"] = "active"
 
-    today = date.today().strftime("%d/%m/%Y")
+    today = date.today().strftime("%Y/%m/%d")
     student_payload["created_at"] = today
     student_payload["updated_at"] = today
 
     # Create the item in the dynamodb
     dynamodb = boto3.resource('dynamodb')
     table = dynamodb.Table('Cohort-Students')
-    response = table.put_item(
-        Item=student_payload
-    )
+
+    already_exists = False
+    try:
+        response = table.put_item(
+            Item=student_payload,
+            ConditionExpression= 'attribute_not_exists(id)',
+        )
+
+    except botocore.exceptions.ClientError as e:
+        # Ignore the ConditionalCheckFailedException, bubble up
+        # other exceptions.
+        if e.response['Error']['Code'] != 'ConditionalCheckFailedException':
+            raise
+        already_exists = True
+
+    # If student exists return an error message
+    if already_exists:
+        return {
+            'statusCode': 400,
+            'body': json.dumps("Student already exists in our system"),
+            'headers': {
+                "Access-Control-Allow-Origin" : "*",
+                "Access-Control-Allow-Credentials" : True
+            },
+        }
 
     # Response for the client
     data = {

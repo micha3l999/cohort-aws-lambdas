@@ -1,6 +1,6 @@
 import boto3
 import json
-
+import json_decoder
 
 def lambda_handler(event, context):
     # Reading events
@@ -22,7 +22,7 @@ def lambda_handler(event, context):
     # Student id was found in Path Parameters, we are going to look up for it in DynamoDB
     if student_id:
         dynamodb = boto3.resource('dynamodb')
-        table = dynamodb.Table('CohortStudents')
+        table = dynamodb.Table('Cohort-Students')
         response = table.get_item(
             Key={
                 'id': student_id,
@@ -39,7 +39,7 @@ def lambda_handler(event, context):
 
     return {
         'statusCode': 200,
-        'body': json.dumps(student),
+        'body': json.dumps(student, cls=json_decoder.DecimalEncoder),
         'headers': {
             "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Credentials": True

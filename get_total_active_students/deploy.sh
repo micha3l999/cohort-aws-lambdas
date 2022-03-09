@@ -1,7 +1,7 @@
-LAMBDA_NAME="student-Get-information"
+LAMBDA_NAME="get_total_active_students"
 
 # Zipping lambda
-zip "${LAMBDA_NAME}.zip" lambda_function.py json_decoder.py
+zip "${LAMBDA_NAME}.zip" lambda_function.py
 
 # Installing python libraries on a ./package folder
 pip install --target ./package -r ./requirements.txt

@@ -1,7 +1,7 @@
-LAMBDA_NAME="student-Get-information"
+LAMBDA_NAME="delete_student_PUT"
 
 # Zipping lambda
-zip "${LAMBDA_NAME}.zip" lambda_function.py json_decoder.py
+zip "${LAMBDA_NAME}.zip" lambda_function.py
 
 # Installing python libraries on a ./package folder
 pip install --target ./package -r ./requirements.txt
