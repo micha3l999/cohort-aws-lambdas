@@ -5,6 +5,7 @@ from datetime import date
 
 # Define the client to interact with AWS Lambda
 
+
 def lambda_handler(event, context):
     client = boto3.client('lambda')
 
@@ -42,7 +43,23 @@ def lambda_handler(event, context):
             'statusCode': 400,
             'body': json.dumps("No picture found in payload")
         }
-    
+
+    # Create the table in the dynamodb
+    dynamodb = boto3.resource('dynamodb')
+    table = dynamodb.Table('Cohort-Students')
+
+    user_exists = check_user_created(student_payload.get('id'), table)
+
+    if user_exists:
+        return {
+            'statusCode': 409,
+            'body': json.dumps("Student already exists in our system"),
+            'headers': {
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Credentials": True
+            },
+        }
+
     # Upload user picture to s3
     inputParams = {
         "id": student_payload.get('id'),
@@ -51,9 +68,9 @@ def lambda_handler(event, context):
 
     # Invoke the lambda to upload the image to s3 and get the image url
     response = client.invoke(
-        FunctionName = "arn:aws:lambda:us-east-2:001915975023:function:student_picture_PUT",
-        InvocationType = 'RequestResponse',
-        Payload = json.dumps(inputParams)
+        FunctionName="arn:aws:lambda:us-east-2:001915975023:function:student_picture_PUT",
+        InvocationType='RequestResponse',
+        Payload=json.dumps(inputParams)
     )
 
     responseFromLambda = json.load(response["Payload"])
@@ -66,15 +83,11 @@ def lambda_handler(event, context):
     student_payload["created_at"] = today
     student_payload["updated_at"] = today
 
-    # Create the item in the dynamodb
-    dynamodb = boto3.resource('dynamodb')
-    table = dynamodb.Table('Cohort-Students')
-
     already_exists = False
     try:
         response = table.put_item(
             Item=student_payload,
-            ConditionExpression= 'attribute_not_exists(id)',
+            ConditionExpression='attribute_not_exists(id)',
         )
 
     except botocore.exceptions.ClientError as e:
@@ -87,11 +100,11 @@ def lambda_handler(event, context):
     # If student exists return an error message
     if already_exists:
         return {
-            'statusCode': 400,
+            'statusCode': 409,
             'body': json.dumps("Student already exists in our system"),
             'headers': {
-                "Access-Control-Allow-Origin" : "*",
-                "Access-Control-Allow-Credentials" : True
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Credentials": True
             },
         }
 
@@ -105,7 +118,21 @@ def lambda_handler(event, context):
         'statusCode': 200,
         'body': json.dumps(data),
         'headers': {
-            "Access-Control-Allow-Origin" : "*",
-            "Access-Control-Allow-Credentials" : True
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Credentials": True
         },
     }
+
+
+def check_user_created(id, table):
+
+    # Searching user in database
+    response = table.get_item(
+        Key={
+            'id': id
+        }
+    )
+
+    user = response.get('Item', {})
+
+    return user
